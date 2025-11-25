@@ -1,0 +1,41 @@
+.loginSection {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    justify-content: center;
+    align-items: center;
+}
+
+.loginAndRegisterForms {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.loginAndRegisterForms form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.loginAndRegisterForms form div {
+    display: flex;
+    gap: 12px;
+    justify-content: space-between;
+}
+
+.changeFormBtn:hover {
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+.navbar ul {
+    display: flex;
+    gap: 12px;
+    list-style-type: none;
+}
+
+.navbar ul li:hover {
+    cursor: pointer;
+    text-decoration: underline;
+}
