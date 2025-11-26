@@ -47,9 +47,11 @@ const LoginForm: React.FC = () => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(formData),
+        credentials: 'include',
       });
 
       const data = await response.json();
+      console.log(data.user.role)
 
       if (response.ok) {
         setResponse({ 

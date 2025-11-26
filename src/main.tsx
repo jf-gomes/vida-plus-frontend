@@ -8,7 +8,7 @@ createRoot(document.getElementById('root')!).render(
   <BrowserRouter>
     <Routes>
       <Route path="/" element={<Login />} />
-      <Route path="/home" element={<Home token='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MTQsImlhdCI6MTc2NDAzMTAyNywiZXhwIjoxNzY0MTE3NDI3fQ.YPmYW_odJcHmHzniBIbZTN-U2_MsOq5XYtLIDZ9nDLU' />} />
+      <Route path="/home" element={<Home />} />
     </Routes>
   </BrowserRouter>
   

@@ -39,3 +39,7 @@
     cursor: pointer;
     text-decoration: underline;
 }
+
+table tr:hover {
+    background-color: grey;
+}

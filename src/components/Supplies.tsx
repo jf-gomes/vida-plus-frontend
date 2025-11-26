@@ -17,21 +17,21 @@ interface SupplyFormData {
 }
 
 interface ResponseState {
-  message: string;
-  type: 'success' | 'error' | null;
+    message: string;
+    type: 'success' | 'error' | null;
 }
 
-export default function Supplies({ token }: { token: string }){
+export default function Supplies(){
 
     const [supplies, setSupplies] = useState<Supply[]>([])
     
         useEffect(() => {
             fetch('http://localhost:3002/api/supplies', {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`,
-            }
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                credentials: 'include',
             })
             .then(response => {
                 if (!response.ok) {
@@ -40,7 +40,7 @@ export default function Supplies({ token }: { token: string }){
                 return response.json();
             })
             .then(data => {
-                console.log('Dados receßbidos:', data);
+                console.log('Dados recebidos:', data);
                 setSupplies(data);
             })
             .catch(error => console.error('Erro ao buscar dados:', error));
@@ -76,53 +76,118 @@ export default function Supplies({ token }: { token: string }){
         setLoading(true);
     
         try {
-          const response = await fetch("http://localhost:3002/api/supplies/" + formData.id, {
-            method: 'PUT',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${token}`
-            },
-            body: JSON.stringify(formData),
-          });
+            const response = await fetch("http://localhost:3002/api/supplies/" + formData.id, {
+                method: 'PUT',
+                headers: {
+                'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(formData),
+                credentials: 'include',
+            });
     
           const data = await response.json();
     
-          if (response.ok) {
+        if (response.ok) {
             setResponse({ 
-              message: 'Item alterado com sucesso', 
-              type: 'success' 
+                message: 'Item alterado com sucesso', 
+                type: 'success'
             });
             setFormData({ id: 0, code: 0, name: '', description: '', quantity: 0 });
+            setIdToChange('')
           } else {
             setResponse({ 
-              message: data.message || 'Ocorreu um erro. Verifique os dados.', 
-              type: 'error' 
+                message: data.message || 'Ocorreu um erro. Verifique os dados.', 
+                type: 'error' 
             });
           }
         } catch (error) {
-          console.error('Erro na comunicação com a API:', error);
-          setResponse({ 
-            message: 'Erro de rede. Verifique se o backend está rodando na porta 3002.', 
-            type: 'error' 
+            console.error('Erro na comunicação com a API:', error);
+            setResponse({ 
+                message: 'Erro de rede. Verifique se o backend está rodando na porta 3002.', 
+                type: 'error' 
           });
         } finally {
-          setLoading(false);
+            setLoading(false);
         }
-      };
+    };
 
+    const [idToChange, setIdToChange] = useState('')
+
+    const handleIdChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+        setIdToChange(e.target.value)
+    };
+
+    const handleSearch = async (e: React.MouseEvent<HTMLButtonElement>) => {
+        e.preventDefault();
+
+        const idToSearch = idToChange.trim(); // Limpar espaços
+    
+        if (!idToSearch) {
+            return setResponse({ message: 'Por favor, informe um ID válido.', type: 'error' });
+        }
+    
+        setLoading(true);
+        setResponse({ message: '', type: null });
+    
+        try {
+            const response = await fetch("http://localhost:3002/api/supplies/" + idToSearch, {
+                method: 'GET',
+                headers: {
+                'Content-Type': 'application/json',
+                },
+                credentials: 'include',
+          });
+    
+        const data: SupplyFormData = await response.json();
+    
+        if (response.ok) {
+            
+            setFormData({
+                id: data.id,
+                code: data.code,
+                name: data.name,
+                description: data.description,
+                quantity: data.quantity,
+            });
+
+            setResponse({ 
+                message: `Item ID ${data.id} buscado com sucesso. Preencha o resto do formulário para editar.`, 
+                type: 'success'
+            });
+            
+        } else {
+            setResponse({ 
+                message: `Ocorreu um erro ao buscar o ID ${idToSearch}.`, 
+                type: 'error' 
+            });
+        }
+        } catch (error) {
+            console.error('Erro na comunicação com a API:', error);
+            setResponse({ 
+                message: 'Erro de rede. Verifique se o backend está rodando.', 
+                type: 'error' 
+            });
+        } finally {
+            setLoading(false);
+        }
+    };
 
     return (
         <section>
+            <h2>Suprimentos</h2>
             <table>
                 <tr>
-                    <td>ID</td>
-                    <td>Código</td>
-                    <td>Nome</td>
-                    <td>Descrição</td>
-                    <td>Quantidade</td>
+                    <th>ID</th>
+                    <th>Código</th>
+                    <th>Nome</th>
+                    <th>Descrição</th>
+                    <th>Quantidade</th>
                 </tr>
                 {supplies.map((supply, i) => (
-                    <tr key={i}>
+                    <tr key={i} onClick={() => {
+                        setIdToChange(supply.id.toString())
+                        handleSearch
+                    }}>
                         <td>{supply.id}</td>
                         <td>{supply.code}</td>
                         <td>{supply.name}</td>
@@ -132,19 +197,34 @@ export default function Supplies({ token }: { token: string }){
                 ))}
             </table>
 
+            <h3>Editar suprimento</h3>
             <form onSubmit={handleSubmit}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                    <label htmlFor="idToSearch">Informe o ID para buscar:</label>
+                    <input 
+                        type="number"
+                        id="idToSearch"
+                        name="idToSearch"
+                        value={idToChange}
+                        onChange={handleIdChange}
+                        disabled={loading}
+                        required
+                    />
+                    <button type="button" onClick={handleSearch} disabled={loading}>Buscar</button>
+                </div>
+                
                 <div>
-                    <label htmlFor="id">ID:</label>
+                    <label htmlFor="id">ID do Item Editando:</label>
                     <input
                         type="number"
                         id="id"
                         name="id"
                         value={formData.id}
-                        onChange={handleChange}
-                        required
+                        readOnly
+                        style={{ backgroundColor: '#eee' }}
                     />
                 </div>
-
+                
                 <div>
                     <label htmlFor="code">Código:</label>
                     <input
@@ -192,14 +272,16 @@ export default function Supplies({ token }: { token: string }){
                         required
                     />
                 </div>
-
+                
                 {response.message && (
-                <div>
+                <div style={{ color: response.type === 'error' ? 'red' : 'green' }}>
                     {response.message}
                 </div>
-        )}
+                )}
 
-                <button type="submit" disabled={loading}>{loading ? 'Cadastrando...' : 'Cadastrar'}</button>
+                <button type="submit" disabled={loading || formData.id === 0}>
+                  {loading ? 'Atualizando...' : 'Atualizar Item'}
+                </button>
             </form>
         </section>
     )
