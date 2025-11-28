@@ -1,5 +1,5 @@
 import Supplies from "../components/Supplies"
-// import Rooms from "../components/Rooms"
+import Rooms from "../components/Rooms"
 import Prescriptions from "../components/Prescriptions"
 
 export default function Home(){
@@ -9,6 +9,7 @@ export default function Home(){
         <>
             <Supplies />
             <Prescriptions />
+            <Rooms />
         </>
 
         

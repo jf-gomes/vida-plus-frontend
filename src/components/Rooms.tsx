@@ -1,19 +1,19 @@
 import { useState, useEffect } from "react";
 
-import CreatePrescriptionForm from "./CreatePrescriptionForm";
+import CreateRoomForm from "./CreateRoomForm";
 
-interface Prescription {
+interface Room {
     id: number,
-    assignedTo: number,
-    assignedBy: number,
-    details: string,
+    number: number,
+    type: string,
+    capacity: number,
 }
 
-interface PrescriptionFormData {
+interface RoomFormData {
     id: number,
-    assignedTo: number,
-    assignedBy: number,
-    details: string,
+    number: number,
+    type: string,
+    capacity: number,
 }
 
 interface ResponseState {
@@ -21,12 +21,12 @@ interface ResponseState {
     type: 'success' | 'error' | null;
 }
 
-export default function Prescriptions(){
+export default function Rooms(){
 
-    const [prescriptions, setPrescriptions] = useState<Prescription[]>([])
+    const [rooms, setRooms] = useState<Room[]>([])
     
         useEffect(() => {
-            fetch('http://localhost:3002/api/prescriptions', {
+            fetch('http://localhost:3002/api/rooms', {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
@@ -41,17 +41,17 @@ export default function Prescriptions(){
             })
             .then(data => {
                 console.log('Dados recebidos:', data);
-                setPrescriptions(data);
+                setRooms(data);
             })
             .catch(error => console.error('Erro ao buscar dados:', error));
     }, []);
 
 
-    const [formData, setFormData] = useState<PrescriptionFormData>({
+    const [formData, setFormData] = useState<RoomFormData>({
         id: 0,
-        assignedTo: 0,
-        assignedBy: 0,
-        details: '',
+        number: 0,
+        type:'',
+        capacity: 0,
     });
 
     const [response, setResponse] = useState<ResponseState>({ message: '', type: null });
@@ -68,14 +68,14 @@ export default function Prescriptions(){
         e.preventDefault();
         setResponse({ message: '', type: null });
     
-        if (!formData.id || !formData.assignedTo || !formData.assignedBy || !formData.details) {
+        if (!formData.id || !formData.number || !formData.type || !formData.capacity) {
             return setResponse({ message: 'Por favor, preencha todos os campos.', type: 'error' });
         }
     
         setLoading(true);
     
         try {
-            const response = await fetch("http://localhost:3002/api/prescriptions/" + formData.id, {
+            const response = await fetch("http://localhost:3002/api/rooms/" + formData.id, {
                 method: 'PUT',
                 headers: {
                 'Content-Type': 'application/json',
@@ -91,7 +91,7 @@ export default function Prescriptions(){
                 message: 'Item alterado com sucesso', 
                 type: 'success'
             });
-            setFormData({ id: 0, assignedTo: 0, assignedBy: 0, details: '' });
+            setFormData({ id: 0, number: 0, type: '', capacity: 0 });
             setIdToChange('')
           } else {
             setResponse({ 
@@ -129,7 +129,7 @@ export default function Prescriptions(){
         setResponse({ message: '', type: null });
     
         try {
-            const response = await fetch("http://localhost:3002/api/prescriptions/" + idToSearch, {
+            const response = await fetch("http://localhost:3002/api/rooms/" + idToSearch, {
                 method: 'GET',
                 headers: {
                 'Content-Type': 'application/json',
@@ -137,15 +137,15 @@ export default function Prescriptions(){
                 credentials: 'include',
           });
     
-        const data: PrescriptionFormData = await response.json();
+        const data: RoomFormData = await response.json();
     
         if (response.ok) {
             
             setFormData({
                 id: data.id,
-                assignedTo: data.assignedTo,
-                assignedBy: data.assignedBy,
-                details: data.details,
+                number: data.number,
+                type: data.type,
+                capacity: data.capacity,
             });
 
             setResponse({ 
@@ -182,7 +182,7 @@ export default function Prescriptions(){
         setResponse({ message: '', type: null });
     
         try {
-            const response = await fetch("http://localhost:3002/api/prescriptions/" + idToDelete, {
+            const response = await fetch("http://localhost:3002/api/rooms/" + idToDelete, {
                 method: 'DELETE',
                 headers: {
                 'Content-Type': 'application/json',
@@ -218,28 +218,28 @@ export default function Prescriptions(){
 
     return (
         <section>
-            <h2>Receitas</h2>
+            <h2>Quartos</h2>
             <table>
                 <tr>
                     <th>ID</th>
-                    <th>Paciente</th>
-                    <th>Médico responsável</th>
-                    <th>Detalhes</th>
+                    <th>Número</th>
+                    <th>Tipo</th>
+                    <th>Capacidade</th>
                 </tr>
-                {prescriptions.map((prescriptions, i) => (
+                {rooms.map((room, i) => (
                     <tr key={i} onClick={() => {
-                        setIdToChange(prescriptions.id.toString())
+                        setIdToChange(room.id.toString())
                         handleSearch
                     }}>
-                        <td>{prescriptions.id}</td>
-                        <td>{prescriptions.assignedTo}</td>
-                        <td>{prescriptions.assignedBy}</td>
-                        <td>{prescriptions.details}</td>
+                        <td>{room.id}</td>
+                        <td>{room.number}</td>
+                        <td>{room.type}</td>
+                        <td>{room.capacity}</td>
                     </tr>
                 ))}
             </table>
 
-            <h3>Editar receita</h3>
+            <h3>Editar quarto</h3>
             <form onSubmit={handleSubmit}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
                     <label htmlFor="idToSearch">Informe o ID para editar:</label>
@@ -256,7 +256,7 @@ export default function Prescriptions(){
                 </div>
                 
                 <div>
-                    <label htmlFor="id">ID da receita para editar:</label>
+                    <label htmlFor="id">ID do quarto para editar:</label>
                     <input
                         type="number"
                         id="id"
@@ -268,36 +268,36 @@ export default function Prescriptions(){
                 </div>
                 
                 <div>
-                    <label htmlFor="patient">Paciente:</label>
+                    <label htmlFor="number">Número:</label>
                     <input
                         type="number"
-                        id="patientNumber"
-                        name="patientNumber"
-                        value={formData.assignedTo}
+                        id="number"
+                        name="number"
+                        value={formData.number}
                         onChange={handleChange}
                         required
                     />
                 </div>
 
                 <div>
-                    <label htmlFor="healthProfessional">Médico:</label>
-                    <input
-                        type="number"
-                        id="professionalNumber"
-                        name="professionalNumber"
-                        value={formData.assignedBy}
-                        onChange={handleChange}
-                        required
-                    />
-                </div>
-
-                <div>
-                    <label htmlFor="details">Detalhes:</label>
+                    <label htmlFor="type">Tipo:</label>
                     <input
                         type="text"
-                        id="details"
-                        name="details"
-                        value={formData.details}
+                        id="type"
+                        name="type"
+                        value={formData.type}
+                        onChange={handleChange}
+                        required
+                    />
+                </div>
+
+                <div>
+                    <label htmlFor="capacity">Capacidade:</label>
+                    <input
+                        type="number"
+                        id="capacity"
+                        name="capacity"
+                        value={formData.capacity}
                         onChange={handleChange}
                         required
                     />
@@ -317,8 +317,8 @@ export default function Prescriptions(){
                 }}>Deletar Item</button>
             </form>
 
-            <h3>Inserir receita</h3>
-            <CreatePrescriptionForm />
+            <h3>Inserir quarto</h3>
+            <CreateRoomForm />
         </section>
     )
 }
