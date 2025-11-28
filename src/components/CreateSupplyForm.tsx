@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 
-interface RoomCreationData {
-  number: number,
-  type: string;
-  capacity: number;
+interface SupplyCreationData {
+  code: number,
+  name: string;
+  description: string;
+  quantity: number
 }
 
 interface ResponseState {
@@ -11,13 +12,14 @@ interface ResponseState {
   type: 'success' | 'error' | null;
 }
 
-const API_URL = 'http://localhost:3002/api/rooms/create';
+const API_URL = 'http://localhost:3002/api/supplies/create';
 
-const CreateRoomForm: React.FC = () => {
-  const [formData, setFormData] = useState<RoomCreationData>({
-    number: 0,
-    type: 'AppointmentRoom',
-    capacity: 0,
+const CreateSupplyForm: React.FC = () => {
+  const [formData, setFormData] = useState<SupplyCreationData>({
+    code: 0,
+    name: '',
+    description: '',
+    quantity: 0
   });
   const [response, setResponse] = useState<ResponseState>({ message: '', type: null });
   const [loading, setLoading] = useState(false);
@@ -33,7 +35,7 @@ const CreateRoomForm: React.FC = () => {
     e.preventDefault();
     setResponse({ message: '', type: null });
 
-    if (!formData.number || !formData.type || !formData.capacity) {
+    if (!formData.code || !formData.name || !formData.description) {
         return setResponse({ message: 'Por favor, preencha todos os campos.', type: 'error' });
     }
 
@@ -53,10 +55,10 @@ const CreateRoomForm: React.FC = () => {
 
       if (response.ok) {
         setResponse({ 
-          message: 'Cadastro de quarto realizado com sucesso', 
+          message: 'Cadastro de suprimento realizado com sucesso', 
           type: 'success' 
         });
-        setFormData({ number: 0, type: '', capacity: 0 });
+        setFormData({ code: 0, name: '', description: '', quantity: 0 });
       } else {
         setResponse({ 
           message: data.message || 'Falha no cadastro. Verifique os dados.', 
@@ -78,32 +80,48 @@ const CreateRoomForm: React.FC = () => {
     <form onSubmit={handleSubmit}>
 
         <div>
-          <label htmlFor="number">Número do quarto:</label>
+          <label htmlFor="code">Código:</label>
           <input
             type="number"
-            id="number"
-            name="number"
-            value={formData.number}
+            id="code"
+            name="code"
+            value={formData.code}
             onChange={handleChange}
             required
           />
         </div>
 
         <div>
-          <label htmlFor="type">Tipo de quarto:</label>
-          <select name="type" id="type" onChange={handleChange}>
-            <option value="AppointmentRoom">Sala de consulta</option>
-            <option value="Hospitalization">Internação</option>
-          </select>
+          <label htmlFor="name">Nome:</label>
+          <input
+            type="text"
+            id="name"
+            name="name"
+            value={formData.name}
+            onChange={handleChange}
+            required
+            />
         </div>
 
         <div>
-          <label htmlFor="capacity">Capacidade:</label>
+          <label htmlFor="description">Descrição:</label>
+          <input
+            type="text"
+            id="description"
+            name="description"
+            value={formData.description}
+            onChange={handleChange}
+            required
+            />
+        </div>
+
+        <div>
+          <label htmlFor="quantity">Quantidade:</label>
           <input
             type="number"
-            id="capacity"
-            name="capacity"
-            value={formData.capacity}
+            id="quantity"
+            name="quantity"
+            value={formData.quantity}
             onChange={handleChange}
             required
             />
@@ -121,4 +139,4 @@ const CreateRoomForm: React.FC = () => {
   );
 };
 
-export default CreateRoomForm;
+export default CreateSupplyForm;

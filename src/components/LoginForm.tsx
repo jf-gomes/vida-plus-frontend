@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router';
 
-interface UserRegistrationData {
+interface UserLoginData {
   email: string,
   password: string;
 }
@@ -16,7 +16,7 @@ const API_URL = 'http://localhost:3002/api/users/login';
 const LoginForm: React.FC = () => {
   let navigate = useNavigate()
 
-  const [formData, setFormData] = useState<UserRegistrationData>({
+  const [formData, setFormData] = useState<UserLoginData>({
     email: '',
     password: ''
   });
@@ -51,7 +51,6 @@ const LoginForm: React.FC = () => {
       });
 
       const data = await response.json();
-      console.log(data.user.role)
 
       if (response.ok) {
         setResponse({ 
@@ -78,10 +77,8 @@ const LoginForm: React.FC = () => {
   };
 
   return (
-    <div className='loginAndRegisterForms'>
-        <h1>
-          Login Vida Plus
-        </h1>
+    <div>
+        <h1>Login Vida Plus</h1>
         <form onSubmit={handleSubmit}>
             <div>
                 <label htmlFor="email">E-mail</label>
@@ -107,11 +104,11 @@ const LoginForm: React.FC = () => {
                 />
           </div>
 
-        {response.message && (
+          {response.message && (
             <div>{response.message}</div>
-        )}
+          )}
 
-            <button type="submit" disabled={loading}>{loading ? 'Entrando...' : 'Entrar'}</button>
+          <button type="submit" disabled={loading}>{loading ? 'Entrando...' : 'Entrar'}</button>
         </form>
     </div>
   );

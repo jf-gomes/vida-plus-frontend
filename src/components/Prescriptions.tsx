@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-
 import CreatePrescriptionForm from "./CreatePrescriptionForm";
 
 interface Prescription {
@@ -24,26 +23,29 @@ interface ResponseState {
 export default function Prescriptions(){
 
     const [prescriptions, setPrescriptions] = useState<Prescription[]>([])
+
+    const loadPrescriptions = () => {
+        fetch('http://localhost:3002/api/prescriptions', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            credentials: 'include',
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Falha na requisição: ' + response.status);
+            }
+            return response.json();
+        })
+        .then(data => {
+            setPrescriptions(data);
+        })
+        .catch(error => console.error('Erro ao buscar dados:', error));
+    }
     
-        useEffect(() => {
-            fetch('http://localhost:3002/api/prescriptions', {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                credentials: 'include',
-            })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Falha na requisição: ' + response.status);
-                }
-                return response.json();
-            })
-            .then(data => {
-                console.log('Dados recebidos:', data);
-                setPrescriptions(data);
-            })
-            .catch(error => console.error('Erro ao buscar dados:', error));
+    useEffect(() => {
+        loadPrescriptions()
     }, []);
 
 
@@ -93,6 +95,7 @@ export default function Prescriptions(){
             });
             setFormData({ id: 0, assignedTo: 0, assignedBy: 0, details: '' });
             setIdToChange('')
+            loadPrescriptions()
           } else {
             setResponse({ 
                 message: data.message || 'Ocorreu um erro. Verifique os dados.', 
@@ -119,7 +122,7 @@ export default function Prescriptions(){
     const handleSearch = async (e: React.MouseEvent<HTMLButtonElement>) => {
         e.preventDefault();
 
-        const idToSearch = idToChange.trim(); // Limpar espaços
+        const idToSearch = idToChange.trim();
     
         if (!idToSearch) {
             return setResponse({ message: 'Por favor, informe um ID válido.', type: 'error' });
@@ -172,7 +175,7 @@ export default function Prescriptions(){
 
     const handlePrescriptionDelete = async () => {
 
-        const idToDelete = idToChange.trim(); // Limpar espaços
+        const idToDelete = idToChange.trim();
     
         if (!idToDelete) {
             return setResponse({ message: 'Por favor, informe um ID válido.', type: 'error' });
@@ -216,6 +219,19 @@ export default function Prescriptions(){
         }
     };
 
+    const handleRowClick = (prescription: Prescription) => {
+        setFormData({
+            id: prescription.id,
+            assignedTo: prescription.assignedTo,
+            assignedBy: prescription.assignedBy,
+            details: prescription.details,
+        });
+        setIdToChange(prescription.id.toString());
+        setResponse({ message: `Editando receita: ${prescription.id}`, type: null });
+        
+        window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+    }
+
     return (
         <section>
             <h2>Receitas</h2>
@@ -228,8 +244,7 @@ export default function Prescriptions(){
                 </tr>
                 {prescriptions.map((prescriptions, i) => (
                     <tr key={i} onClick={() => {
-                        setIdToChange(prescriptions.id.toString())
-                        handleSearch
+                        handleRowClick(prescriptions)
                     }}>
                         <td>{prescriptions.id}</td>
                         <td>{prescriptions.assignedTo}</td>
@@ -241,7 +256,7 @@ export default function Prescriptions(){
 
             <h3>Editar receita</h3>
             <form onSubmit={handleSubmit}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                <div>
                     <label htmlFor="idToSearch">Informe o ID para editar:</label>
                     <input 
                         type="number"
@@ -263,7 +278,6 @@ export default function Prescriptions(){
                         name="id"
                         value={formData.id}
                         readOnly
-                        style={{ backgroundColor: '#eee' }}
                     />
                 </div>
                 
@@ -304,17 +318,17 @@ export default function Prescriptions(){
                 </div>
                 
                 {response.message && (
-                <div style={{ color: response.type === 'error' ? 'red' : 'green' }}>
+                <div>
                     {response.message}
                 </div>
                 )}
 
                 <button type="submit" disabled={loading || formData.id === 0}>
-                  {loading ? 'Atualizando...' : 'Atualizar Item'}
+                  {loading ? 'Atualizando...' : 'Atualizar receita'}
                 </button>
                 <button onClick={() => {
                     handlePrescriptionDelete()
-                }}>Deletar Item</button>
+                }}>Deletar receita</button>
             </form>
 
             <h3>Inserir receita</h3>

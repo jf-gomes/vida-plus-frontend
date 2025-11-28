@@ -24,28 +24,30 @@ interface ResponseState {
 export default function Rooms(){
 
     const [rooms, setRooms] = useState<Room[]>([])
-    
-        useEffect(() => {
-            fetch('http://localhost:3002/api/rooms', {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                credentials: 'include',
-            })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Falha na requisição: ' + response.status);
-                }
-                return response.json();
-            })
-            .then(data => {
-                console.log('Dados recebidos:', data);
-                setRooms(data);
-            })
-            .catch(error => console.error('Erro ao buscar dados:', error));
-    }, []);
 
+    const loadRooms = () => {
+        fetch('http://localhost:3002/api/rooms', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            credentials: 'include',
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Falha na requisição: ' + response.status);
+            }
+            return response.json();
+        })
+        .then(data => {
+            setRooms(data);
+        })
+        .catch(error => console.error('Erro ao buscar dados:', error));
+    }
+    
+    useEffect(() => {
+        loadRooms()
+    }, []);
 
     const [formData, setFormData] = useState<RoomFormData>({
         id: 0,
@@ -93,6 +95,7 @@ export default function Rooms(){
             });
             setFormData({ id: 0, number: 0, type: '', capacity: 0 });
             setIdToChange('')
+            loadRooms()
           } else {
             setResponse({ 
                 message: data.message || 'Ocorreu um erro. Verifique os dados.', 
@@ -119,7 +122,7 @@ export default function Rooms(){
     const handleSearch = async (e: React.MouseEvent<HTMLButtonElement>) => {
         e.preventDefault();
 
-        const idToSearch = idToChange.trim(); // Limpar espaços
+        const idToSearch = idToChange.trim();
     
         if (!idToSearch) {
             return setResponse({ message: 'Por favor, informe um ID válido.', type: 'error' });
@@ -172,7 +175,7 @@ export default function Rooms(){
 
     const handlePrescriptionDelete = async () => {
 
-        const idToDelete = idToChange.trim(); // Limpar espaços
+        const idToDelete = idToChange.trim();
     
         if (!idToDelete) {
             return setResponse({ message: 'Por favor, informe um ID válido.', type: 'error' });
@@ -189,8 +192,6 @@ export default function Rooms(){
                 },
                 credentials: 'include',
           });
-
-          console.log(response)
     
         if (response.status == 204) {
 
@@ -216,6 +217,19 @@ export default function Rooms(){
         }
     };
 
+    const handleRowClick = (room: Room) => {
+        setFormData({
+            id: room.id,
+            number: room.number,
+            type: room.type,
+            capacity: room.capacity,
+        });
+        setIdToChange(room.id.toString());
+        setResponse({ message: `Editando quarto: ${room.number}`, type: null });
+        
+        window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+    }
+
     return (
         <section>
             <h2>Quartos</h2>
@@ -228,8 +242,7 @@ export default function Rooms(){
                 </tr>
                 {rooms.map((room, i) => (
                     <tr key={i} onClick={() => {
-                        setIdToChange(room.id.toString())
-                        handleSearch
+                        handleRowClick(room)
                     }}>
                         <td>{room.id}</td>
                         <td>{room.number}</td>
@@ -241,7 +254,7 @@ export default function Rooms(){
 
             <h3>Editar quarto</h3>
             <form onSubmit={handleSubmit}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                <div>
                     <label htmlFor="idToSearch">Informe o ID para editar:</label>
                     <input 
                         type="number"
@@ -263,7 +276,6 @@ export default function Rooms(){
                         name="id"
                         value={formData.id}
                         readOnly
-                        style={{ backgroundColor: '#eee' }}
                     />
                 </div>
                 
@@ -304,17 +316,17 @@ export default function Rooms(){
                 </div>
                 
                 {response.message && (
-                <div style={{ color: response.type === 'error' ? 'red' : 'green' }}>
+                <div>
                     {response.message}
                 </div>
                 )}
 
                 <button type="submit" disabled={loading || formData.id === 0}>
-                  {loading ? 'Atualizando...' : 'Atualizar Item'}
+                  {loading ? 'Atualizando...' : 'Atualizar quarto'}
                 </button>
                 <button onClick={() => {
                     handlePrescriptionDelete()
-                }}>Deletar Item</button>
+                }}>Deletar quarto</button>
             </form>
 
             <h3>Inserir quarto</h3>

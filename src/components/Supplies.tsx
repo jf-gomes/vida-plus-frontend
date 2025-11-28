@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import CreateSupplyForm from "./CreateSupplyForm";
 
 interface Supply {
     id: number,
@@ -24,8 +25,8 @@ interface ResponseState {
 export default function Supplies(){
 
     const [supplies, setSupplies] = useState<Supply[]>([])
-    
-        useEffect(() => {
+
+        const loadSupplies = () => {
             fetch('http://localhost:3002/api/supplies', {
                 method: 'GET',
                 headers: {
@@ -40,10 +41,13 @@ export default function Supplies(){
                 return response.json();
             })
             .then(data => {
-                console.log('Dados recebidos:', data);
                 setSupplies(data);
             })
             .catch(error => console.error('Erro ao buscar dados:', error));
+        }
+    
+        useEffect(() => {
+            loadSupplies()
     }, []);
 
 
@@ -94,6 +98,7 @@ export default function Supplies(){
             });
             setFormData({ id: 0, code: 0, name: '', description: '', quantity: 0 });
             setIdToChange('')
+            loadSupplies()
           } else {
             setResponse({ 
                 message: data.message || 'Ocorreu um erro. Verifique os dados.', 
@@ -120,7 +125,7 @@ export default function Supplies(){
     const handleSearch = async (e: React.MouseEvent<HTMLButtonElement>) => {
         e.preventDefault();
 
-        const idToSearch = idToChange.trim(); // Limpar espaços
+        const idToSearch = idToChange.trim();
     
         if (!idToSearch) {
             return setResponse({ message: 'Por favor, informe um ID válido.', type: 'error' });
@@ -172,6 +177,20 @@ export default function Supplies(){
         }
     };
 
+    const handleRowClick = (supply: Supply) => {
+        setFormData({
+            id: supply.id,
+            code: supply.code,
+            name: supply.name,
+            description: supply.description,
+            quantity: supply.quantity,
+        });
+        setIdToChange(supply.id.toString());
+        setResponse({ message: `Editando suprimento: ${supply.name}`, type: null });
+        
+        window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+    }
+
     return (
         <section>
             <h2>Suprimentos</h2>
@@ -184,10 +203,7 @@ export default function Supplies(){
                     <th>Quantidade</th>
                 </tr>
                 {supplies.map((supply, i) => (
-                    <tr key={i} onClick={() => {
-                        setIdToChange(supply.id.toString())
-                        handleSearch
-                    }}>
+                    <tr key={i} onClick={() => handleRowClick(supply)}>
                         <td>{supply.id}</td>
                         <td>{supply.code}</td>
                         <td>{supply.name}</td>
@@ -199,7 +215,7 @@ export default function Supplies(){
 
             <h3>Editar suprimento</h3>
             <form onSubmit={handleSubmit}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                <div>
                     <label htmlFor="idToSearch">Informe o ID para buscar:</label>
                     <input 
                         type="number"
@@ -221,7 +237,6 @@ export default function Supplies(){
                         name="id"
                         value={formData.id}
                         readOnly
-                        style={{ backgroundColor: '#eee' }}
                     />
                 </div>
                 
@@ -274,15 +289,17 @@ export default function Supplies(){
                 </div>
                 
                 {response.message && (
-                <div style={{ color: response.type === 'error' ? 'red' : 'green' }}>
+                <div>
                     {response.message}
                 </div>
                 )}
 
                 <button type="submit" disabled={loading || formData.id === 0}>
-                  {loading ? 'Atualizando...' : 'Atualizar Item'}
+                  {loading ? 'Atualizando...' : 'Atualizar suprimento'}
                 </button>
             </form>
+            <h3>Inserir suprimento</h3>
+            <CreateSupplyForm />
         </section>
     )
 }

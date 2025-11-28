@@ -90,7 +90,7 @@ const RegisterForm: React.FC = () => {
   };
 
   return (
-    <div className='loginAndRegisterForms'>
+    <div>
       <h1>Cadastro Vida Plus</h1>
       <form onSubmit={handleSubmit}>
         <div>
