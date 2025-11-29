@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 
+//tipagem dos dados do formulário (mantendo o padrão do db)
 interface PrescriptionCreationData {
   assignedTo: number,
   assignedBy: number;
@@ -14,6 +15,8 @@ interface ResponseState {
 const API_URL = 'http://localhost:3002/api/prescriptions/';
 
 const CreatePrescriptionForm: React.FC = () => {
+
+  //cria e inicia a variávl que armazenará os dados do formulário
   const [formData, setFormData] = useState<PrescriptionCreationData>({
     assignedTo: 0,
     assignedBy: 0,
@@ -22,6 +25,7 @@ const CreatePrescriptionForm: React.FC = () => {
   const [response, setResponse] = useState<ResponseState>({ message: '', type: null });
   const [loading, setLoading] = useState(false);
 
+  //quando houver mudança em algum campo do formulário, o valor inserido é armazenado na variável formData
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setFormData({
       ...formData,
@@ -29,6 +33,7 @@ const CreatePrescriptionForm: React.FC = () => {
     });
   };
 
+  //executa a inserção dos dados via http post
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setResponse({ message: '', type: null });
@@ -53,7 +58,7 @@ const CreatePrescriptionForm: React.FC = () => {
 
       if (response.ok) {
         setResponse({ 
-          message: 'Cadastro de receita realizado com sucesso', 
+          message: 'Cadastro de receita realizado com sucesso!', 
           type: 'success' 
         });
         setFormData({ assignedTo: 0, assignedBy: 0, details: '' });

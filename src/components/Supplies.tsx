@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import CreateSupplyForm from "./CreateSupplyForm";
 
+//tipagem dos dados do formulário (mantendo o padrão do db)
 interface Supply {
     id: number,
     code: number,
@@ -9,13 +10,7 @@ interface Supply {
     quantity: number
 }
 
-interface SupplyFormData {
-    id: number,
-    code: number,
-    name: string,
-    description: string,
-    quantity: number
-}
+interface SupplyFormData extends Supply {}
 
 interface ResponseState {
     message: string;
@@ -24,9 +19,11 @@ interface ResponseState {
 
 export default function Supplies(){
 
+    //criação e inicialização da variável que armazenará os dados da api
     const [supplies, setSupplies] = useState<Supply[]>([])
 
         const loadSupplies = () => {
+            //busca os dados existentes
             fetch('http://localhost:3002/api/supplies', {
                 method: 'GET',
                 headers: {
@@ -47,10 +44,11 @@ export default function Supplies(){
         }
     
         useEffect(() => {
+            //busca os dados sempre que o componente for carregado (o array vazio garante isso)
             loadSupplies()
     }, []);
 
-
+    //criação e inicialização das variáveis do formulario
     const [formData, setFormData] = useState<SupplyFormData>({
         id: 0,
         code: 0,
@@ -60,8 +58,10 @@ export default function Supplies(){
     });
 
     const [response, setResponse] = useState<ResponseState>({ message: '', type: null });
+
     const [loading, setLoading] = useState(false);
 
+    //quando houver alteração em algum campo do formulário, o valor inserido é armazenado na variável formData
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         setFormData({
           ...formData,
@@ -69,16 +69,19 @@ export default function Supplies(){
         });
     };
 
+    //quando o formulário é enviado
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setResponse({ message: '', type: null });
     
+        //se tiver dados faltando
         if (!formData.id || !formData.code || !formData.name || !formData.description || !formData.quantity) {
             return setResponse({ message: 'Por favor, preencha todos os campos.', type: 'error' });
         }
     
         setLoading(true);
     
+        //executa a edição via http put
         try {
             const response = await fetch("http://localhost:3002/api/supplies/" + formData.id, {
                 method: 'PUT',
@@ -91,92 +94,36 @@ export default function Supplies(){
     
           const data = await response.json();
     
-        if (response.ok) {
-            setResponse({ 
-                message: 'Item alterado com sucesso', 
-                type: 'success'
-            });
-            setFormData({ id: 0, code: 0, name: '', description: '', quantity: 0 });
-            setIdToChange('')
-            loadSupplies()
-          } else {
-            setResponse({ 
-                message: data.message || 'Ocorreu um erro. Verifique os dados.', 
-                type: 'error' 
-            });
-          }
+            //se a resposta da api for ok, limpa o formulário
+            if (response.ok) {
+                setResponse({ 
+                    message: 'Item alterado com sucesso!', 
+                    type: 'success'
+                });
+                setFormData({ id: 0, code: 0, name: '', description: '', quantity: 0 });
+                setIdToChange('')
+                loadSupplies()
+            } else {
+                setResponse({ 
+                    message: data.message || 'Ocorreu um erro. Verifique os dados.', 
+                    type: 'error' 
+                });
+            }
         } catch (error) {
             console.error('Erro na comunicação com a API:', error);
             setResponse({ 
                 message: 'Erro de rede. Verifique se o backend está rodando na porta 3002.', 
                 type: 'error' 
-          });
+            });
         } finally {
             setLoading(false);
         }
     };
 
+    //variável que armazena o id do item a ser editado
     const [idToChange, setIdToChange] = useState('')
 
-    // const handleIdChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    //     setIdToChange(e.target.value)
-    // };
-
-    // const handleSearch = async (e: React.MouseEvent<HTMLButtonElement>) => {
-    //     e.preventDefault();
-
-    //     const idToSearch = idToChange.trim();
-    
-    //     if (!idToSearch) {
-    //         return setResponse({ message: 'Por favor, informe um ID válido.', type: 'error' });
-    //     }
-    
-    //     setLoading(true);
-    //     setResponse({ message: '', type: null });
-    
-    //     try {
-    //         const response = await fetch("http://localhost:3002/api/supplies/" + idToSearch, {
-    //             method: 'GET',
-    //             headers: {
-    //             'Content-Type': 'application/json',
-    //             },
-    //             credentials: 'include',
-    //       });
-    
-    //     const data: SupplyFormData = await response.json();
-    
-    //     if (response.ok) {
-            
-    //         setFormData({
-    //             id: data.id,
-    //             code: data.code,
-    //             name: data.name,
-    //             description: data.description,
-    //             quantity: data.quantity,
-    //         });
-
-    //         setResponse({ 
-    //             message: `Item ID ${data.id} buscado com sucesso. Preencha o resto do formulário para editar.`, 
-    //             type: 'success'
-    //         });
-            
-    //     } else {
-    //         setResponse({ 
-    //             message: `Ocorreu um erro ao buscar o ID ${idToSearch}.`, 
-    //             type: 'error' 
-    //         });
-    //     }
-    //     } catch (error) {
-    //         console.error('Erro na comunicação com a API:', error);
-    //         setResponse({ 
-    //             message: 'Erro de rede. Verifique se o backend está rodando.', 
-    //             type: 'error' 
-    //         });
-    //     } finally {
-    //         setLoading(false);
-    //     }
-    // };
-
+    //quando o usuário clica na linha da tabela, os campos do formulário são preenchidos com os dados daquele registro
     const handleRowClick = (supply: Supply) => {
         setFormData({
             id: supply.id,
@@ -191,6 +138,7 @@ export default function Supplies(){
         window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
     }
 
+    //exclusão de registro
     const handleSupplyDelete = async () => {
 
         const idToDelete = idToChange.trim();
@@ -202,6 +150,7 @@ export default function Supplies(){
         setLoading(true);
         setResponse({ message: '', type: null });
     
+        //executa a exclusão via http delete
         try {
             const response = await fetch("http://localhost:3002/api/supplies/" + idToDelete, {
                 method: 'DELETE',
@@ -214,7 +163,7 @@ export default function Supplies(){
         if (response.ok) {
 
             setResponse({ 
-                message: 'Item deletado com sucesso.', 
+                message: 'Item deletado com sucesso!', 
                 type: 'success'
             });
             
@@ -235,6 +184,8 @@ export default function Supplies(){
         }
     };
 
+
+    // ============ HTML ============
     return (
         <section>
             <h2>Suprimentos</h2>
@@ -258,21 +209,8 @@ export default function Supplies(){
             </table>
 
             <h3>Editar suprimento</h3>
+            {/* formulário de suprimentos */}
             <form onSubmit={handleSubmit}>
-                {/* <div>
-                    <label htmlFor="idToSearch">Informe o ID para buscar:</label>
-                    <input 
-                        type="number"
-                        id="idToSearch"
-                        name="idToSearch"
-                        value={idToChange}
-                        onChange={handleIdChange}
-                        disabled={loading}
-                        required
-                    />
-                    <button type="button" onClick={handleSearch} disabled={loading}>Buscar</button>
-                </div> */}
-                
                 <div>
                     <label htmlFor="id">ID do suprimento para editar:</label>
                     <input
@@ -347,7 +285,10 @@ export default function Supplies(){
                     handleSupplyDelete()
                 }} className="deleteBtn">Deletar suprimento</p>
             </form>
+            {/* fim do formulário de suprimentos */}
             <h3>Inserir suprimento</h3>
+
+            {/* chama o formulário de criação de suprimentos */}
             <CreateSupplyForm />
         </section>
     )

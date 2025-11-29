@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import CreatePrescriptionForm from "./CreatePrescriptionForm";
 
+//tipagem dos dados do formulário (mantendo o padrão do db)
 interface Prescription {
     id: number,
     assignedTo: number,
@@ -8,12 +9,7 @@ interface Prescription {
     details: string,
 }
 
-interface PrescriptionFormData {
-    id: number,
-    assignedTo: number,
-    assignedBy: number,
-    details: string,
-}
+interface PrescriptionFormData extends Prescription {}
 
 interface ResponseState {
     message: string;
@@ -22,9 +18,11 @@ interface ResponseState {
 
 export default function Prescriptions(){
 
+    //criação e inicialização da variável que armazenará os dados da api
     const [prescriptions, setPrescriptions] = useState<Prescription[]>([])
 
     const loadPrescriptions = () => {
+        //busca os dados existentes
         fetch('http://localhost:3002/api/prescriptions', {
             method: 'GET',
             headers: {
@@ -45,10 +43,11 @@ export default function Prescriptions(){
     }
     
     useEffect(() => {
+        //busca os dados sempre que o componente for carregado (o array vazio garante isso)
         loadPrescriptions()
     }, []);
 
-
+    //criação e inicialização das variáveis do formulario
     const [formData, setFormData] = useState<PrescriptionFormData>({
         id: 0,
         assignedTo: 0,
@@ -57,8 +56,10 @@ export default function Prescriptions(){
     });
 
     const [response, setResponse] = useState<ResponseState>({ message: '', type: null });
+
     const [loading, setLoading] = useState(false);
 
+    //quando houver alteração em algum campo do formulário, o valor inserido é armazenado na variável formData
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         setFormData({
           ...formData,
@@ -66,16 +67,19 @@ export default function Prescriptions(){
         });
     };
 
+    //quando o formulário é enviado
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setResponse({ message: '', type: null });
     
+        //se tiver dados faltando
         if (!formData.id || !formData.assignedTo || !formData.assignedBy || !formData.details) {
             return setResponse({ message: 'Por favor, preencha todos os campos.', type: 'error' });
         }
     
         setLoading(true);
     
+        //executa a edição via http put
         try {
             const response = await fetch("http://localhost:3002/api/prescriptions/" + formData.id, {
                 method: 'PUT',
@@ -88,91 +92,36 @@ export default function Prescriptions(){
     
           const data = await response.json();
     
-        if (response.ok) {
-            setResponse({ 
-                message: 'Item alterado com sucesso', 
-                type: 'success'
-            });
-            setFormData({ id: 0, assignedTo: 0, assignedBy: 0, details: '' });
-            setIdToChange('')
-            loadPrescriptions()
-          } else {
-            setResponse({ 
-                message: data.message || 'Ocorreu um erro. Verifique os dados.', 
-                type: 'error' 
-            });
-          }
+            //se a resposta da api for ok, limpa o formulário
+            if (response.ok) {
+                setResponse({ 
+                    message: 'Item alterado com sucesso!', 
+                    type: 'success'
+                });
+                setFormData({ id: 0, assignedTo: 0, assignedBy: 0, details: '' });
+                setIdToChange('')
+                loadPrescriptions()
+            } else {
+                setResponse({ 
+                    message: data.message || 'Ocorreu um erro. Verifique os dados.', 
+                    type: 'error' 
+                });
+            }
         } catch (error) {
             console.error('Erro na comunicação com a API:', error);
             setResponse({ 
                 message: 'Erro de rede. Verifique se o backend está rodando na porta 3002.', 
                 type: 'error' 
-          });
+            });
         } finally {
             setLoading(false);
         }
     };
 
+    //variável que armazena o id do item a ser editado
     const [idToChange, setIdToChange] = useState('')
 
-    // const handleIdChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    //     setIdToChange(e.target.value)
-    // };
-
-    // const handleSearch = async (e: React.MouseEvent<HTMLButtonElement>) => {
-    //     e.preventDefault();
-
-    //     const idToSearch = idToChange.trim();
-    
-    //     if (!idToSearch) {
-    //         return setResponse({ message: 'Por favor, informe um ID válido.', type: 'error' });
-    //     }
-    
-    //     setLoading(true);
-    //     setResponse({ message: '', type: null });
-    
-    //     try {
-    //         const response = await fetch("http://localhost:3002/api/prescriptions/" + idToSearch, {
-    //             method: 'GET',
-    //             headers: {
-    //             'Content-Type': 'application/json',
-    //             },
-    //             credentials: 'include',
-    //       });
-    
-    //     const data: PrescriptionFormData = await response.json();
-    
-    //     if (response.ok) {
-            
-    //         setFormData({
-    //             id: data.id,
-    //             assignedTo: data.assignedTo,
-    //             assignedBy: data.assignedBy,
-    //             details: data.details,
-    //         });
-
-    //         setResponse({ 
-    //             message: `Item ID ${data.id} buscado com sucesso. Preencha o resto do formulário para editar.`, 
-    //             type: 'success'
-    //         });
-            
-    //     } else {
-    //         setResponse({ 
-    //             message: `Ocorreu um erro ao buscar o ID ${idToSearch}.`, 
-    //             type: 'error' 
-    //         });
-    //     }
-    //     } catch (error) {
-    //         console.error('Erro na comunicação com a API:', error);
-    //         setResponse({ 
-    //             message: 'Erro de rede. Verifique se o backend está rodando.', 
-    //             type: 'error' 
-    //         });
-    //     } finally {
-    //         setLoading(false);
-    //     }
-    // };
-
+    //exclusão de registro
     const handlePrescriptionDelete = async () => {
 
         const idToDelete = idToChange.trim();
@@ -184,6 +133,7 @@ export default function Prescriptions(){
         setLoading(true);
         setResponse({ message: '', type: null });
     
+        //executa a exclusão via http delete
         try {
             const response = await fetch("http://localhost:3002/api/prescriptions/" + idToDelete, {
                 method: 'DELETE',
@@ -191,13 +141,13 @@ export default function Prescriptions(){
                 'Content-Type': 'application/json',
                 },
                 credentials: 'include',
-          });
+            });
     
-        if (response.status == 204) {
+            if (response.status == 204) {
 
-            setResponse({ 
-                message: 'Item deletado com sucesso.', 
-                type: 'success'
+                setResponse({ 
+                    message: 'Item deletado com sucesso!', 
+                    type: 'success'
             });
             
         } else {
@@ -217,6 +167,7 @@ export default function Prescriptions(){
         }
     };
 
+    //quando o usuário clica na linha da tabela, os campos do formulário são preenchidos com os dados daquele registro
     const handleRowClick = (prescription: Prescription) => {
         setFormData({
             id: prescription.id,
@@ -230,6 +181,8 @@ export default function Prescriptions(){
         window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
     }
 
+
+    // ============ HTML ============
     return (
         <section>
             <h2>Receitas</h2>
@@ -253,21 +206,8 @@ export default function Prescriptions(){
             </table>
 
             <h3>Editar receita</h3>
+            {/* formulário de receitas */}
             <form onSubmit={handleSubmit}>
-                {/* <div>
-                    <label htmlFor="idToSearch">Informe o ID para editar:</label>
-                    <input 
-                        type="number"
-                        id="idToSearch"
-                        name="idToSearch"
-                        value={idToChange}
-                        onChange={handleIdChange}
-                        disabled={loading}
-                        required
-                    />
-                    <button type="button" onClick={handleSearch} disabled={loading}>Buscar</button>
-                </div> */}
-                
                 <div>
                     <label htmlFor="id">ID da receita para editar:</label>
                     <input
@@ -329,8 +269,10 @@ export default function Prescriptions(){
                     handlePrescriptionDelete()
                 }} className="deleteBtn">Deletar receita</p>
             </form>
-
+            {/* fim do formulário de receitas */}
             <h3>Inserir receita</h3>
+
+            {/* chama o formulário de criação de receitas */}
             <CreatePrescriptionForm />
         </section>
     )

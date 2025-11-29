@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 
+//tipagem dos dados do formulário (mantendo o padrão do db)
 interface UserCreationData {
     username: string,
     email: string,
@@ -18,6 +19,8 @@ interface ResponseState {
 const API_URL = 'http://localhost:3002/api/users/register';
 
 const CreateUserForm: React.FC = () => {
+
+  //cria e inicia a variávl que armazenará os dados do formulário
   const [formData, setFormData] = useState<UserCreationData>({
     username: '',
     email: '',
@@ -30,6 +33,7 @@ const CreateUserForm: React.FC = () => {
   const [response, setResponse] = useState<ResponseState>({ message: '', type: null });
   const [loading, setLoading] = useState(false);
 
+  //quando houver mudança em algum campo do formulário, o valor inserido é armazenado na variável formData
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setFormData({
       ...formData,
@@ -37,6 +41,7 @@ const CreateUserForm: React.FC = () => {
     });
   };
 
+  //executa a inserção dos dados via http post
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setResponse({ message: '', type: null });
@@ -61,7 +66,7 @@ const CreateUserForm: React.FC = () => {
 
       if (response.ok) {
         setResponse({ 
-          message: 'Cadastro de usuário realizado com sucesso', 
+          message: 'Cadastro de usuário realizado com sucesso!', 
           type: 'success' 
         });
         setFormData({ 

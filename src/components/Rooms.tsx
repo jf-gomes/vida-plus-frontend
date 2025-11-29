@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 
 import CreateRoomForm from "./CreateRoomForm";
 
+//tipagem dos dados do formulário (mantendo o padrão do db)
 interface Room {
     id: number,
     number: number,
@@ -9,12 +10,7 @@ interface Room {
     capacity: number,
 }
 
-interface RoomFormData {
-    id: number,
-    number: number,
-    type: string,
-    capacity: number,
-}
+interface RoomFormData extends Room {}
 
 interface ResponseState {
     message: string;
@@ -23,9 +19,11 @@ interface ResponseState {
 
 export default function Rooms(){
 
+    //criação e inicialização da variável que armazenará os dados da api
     const [rooms, setRooms] = useState<Room[]>([])
 
     const loadRooms = () => {
+        //busca os dados existentes
         fetch('http://localhost:3002/api/rooms', {
             method: 'GET',
             headers: {
@@ -46,9 +44,11 @@ export default function Rooms(){
     }
     
     useEffect(() => {
+        //busca os dados sempre que o componente for carregado (o array vazio garante isso)
         loadRooms()
     }, []);
 
+    //criação e inicialização das variáveis do formulario
     const [formData, setFormData] = useState<RoomFormData>({
         id: 0,
         number: 0,
@@ -57,8 +57,10 @@ export default function Rooms(){
     });
 
     const [response, setResponse] = useState<ResponseState>({ message: '', type: null });
+
     const [loading, setLoading] = useState(false);
 
+    //quando houver alteração em algum campo do formulário, o valor inserido é armazenado na variável formData
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         setFormData({
           ...formData,
@@ -66,16 +68,19 @@ export default function Rooms(){
         });
     };
 
+    //quando o formulário é enviado
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setResponse({ message: '', type: null });
     
+        //se tiver dados faltando
         if (!formData.id || !formData.number || !formData.type || !formData.capacity) {
             return setResponse({ message: 'Por favor, preencha todos os campos.', type: 'error' });
         }
     
         setLoading(true);
     
+        //executa a edição via http put
         try {
             const response = await fetch("http://localhost:3002/api/rooms/" + formData.id, {
                 method: 'PUT',
@@ -88,91 +93,36 @@ export default function Rooms(){
     
           const data = await response.json();
     
-        if (response.ok) {
-            setResponse({ 
-                message: 'Item alterado com sucesso', 
-                type: 'success'
-            });
-            setFormData({ id: 0, number: 0, type: '', capacity: 0 });
-            setIdToChange('')
-            loadRooms()
-          } else {
-            setResponse({ 
-                message: data.message || 'Ocorreu um erro. Verifique os dados.', 
-                type: 'error' 
-            });
-          }
+            //se a resposta da api for ok, limpa o formulário
+            if (response.ok) {
+                setResponse({ 
+                    message: 'Item alterado com sucesso!', 
+                    type: 'success'
+                });
+                setFormData({ id: 0, number: 0, type: '', capacity: 0 });
+                setIdToChange('')
+                loadRooms()
+            } else {
+                setResponse({ 
+                    message: data.message || 'Ocorreu um erro. Verifique os dados.', 
+                    type: 'error' 
+                });
+            }
         } catch (error) {
             console.error('Erro na comunicação com a API:', error);
             setResponse({ 
                 message: 'Erro de rede. Verifique se o backend está rodando na porta 3002.', 
                 type: 'error' 
-          });
-        } finally {
-            setLoading(false);
-        }
+            });
+            } finally {
+                setLoading(false);
+            }
     };
 
+    //variável que armazena o id do item a ser editado
     const [idToChange, setIdToChange] = useState('')
 
-    // const handleIdChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    //     setIdToChange(e.target.value)
-    // };
-
-    // const handleSearch = async (e: React.MouseEvent<HTMLButtonElement>) => {
-    //     e.preventDefault();
-
-    //     const idToSearch = idToChange.trim();
-    
-    //     if (!idToSearch) {
-    //         return setResponse({ message: 'Por favor, informe um ID válido.', type: 'error' });
-    //     }
-    
-    //     setLoading(true);
-    //     setResponse({ message: '', type: null });
-    
-    //     try {
-    //         const response = await fetch("http://localhost:3002/api/rooms/" + idToSearch, {
-    //             method: 'GET',
-    //             headers: {
-    //             'Content-Type': 'application/json',
-    //             },
-    //             credentials: 'include',
-    //       });
-    
-    //     const data: RoomFormData = await response.json();
-    
-    //     if (response.ok) {
-            
-    //         setFormData({
-    //             id: data.id,
-    //             number: data.number,
-    //             type: data.type,
-    //             capacity: data.capacity,
-    //         });
-
-    //         setResponse({ 
-    //             message: `Item ID ${data.id} buscado com sucesso. Preencha o resto do formulário para editar.`, 
-    //             type: 'success'
-    //         });
-            
-    //     } else {
-    //         setResponse({ 
-    //             message: `Ocorreu um erro ao buscar o ID ${idToSearch}.`, 
-    //             type: 'error' 
-    //         });
-    //     }
-    //     } catch (error) {
-    //         console.error('Erro na comunicação com a API:', error);
-    //         setResponse({ 
-    //             message: 'Erro de rede. Verifique se o backend está rodando.', 
-    //             type: 'error' 
-    //         });
-    //     } finally {
-    //         setLoading(false);
-    //     }
-    // };
-
+    //exclusão de registro
     const handlePrescriptionDelete = async () => {
 
         const idToDelete = idToChange.trim();
@@ -183,7 +133,8 @@ export default function Rooms(){
     
         setLoading(true);
         setResponse({ message: '', type: null });
-    
+
+        //executa a exclusão via http delete
         try {
             const response = await fetch("http://localhost:3002/api/rooms/" + idToDelete, {
                 method: 'DELETE',
@@ -191,13 +142,13 @@ export default function Rooms(){
                 'Content-Type': 'application/json',
                 },
                 credentials: 'include',
-          });
+            });
     
-        if (response.status == 204) {
+            if (response.status == 204) {
 
-            setResponse({ 
-                message: 'Item deletado com sucesso.', 
-                type: 'success'
+                setResponse({ 
+                    message: 'Item deletado com sucesso!', 
+                    type: 'success'
             });
             
         } else {
@@ -217,6 +168,7 @@ export default function Rooms(){
         }
     };
 
+    //quando o usuário clica na linha da tabela, os campos do formulário são preenchidos com os dados daquele registro
     const handleRowClick = (room: Room) => {
         setFormData({
             id: room.id,
@@ -230,6 +182,8 @@ export default function Rooms(){
         window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
     }
 
+
+    // ============ HTML ============
     return (
         <section>
             <h2>Quartos</h2>
@@ -253,21 +207,9 @@ export default function Rooms(){
             </table>
 
             <h3>Editar quarto</h3>
+
+            {/* formulário de quartos */}
             <form onSubmit={handleSubmit}>
-                {/* <div>
-                    <label htmlFor="idToSearch">Informe o ID para editar:</label>
-                    <input 
-                        type="number"
-                        id="idToSearch"
-                        name="idToSearch"
-                        value={idToChange}
-                        onChange={handleIdChange}
-                        disabled={loading}
-                        required
-                    />
-                    <button type="button" onClick={handleSearch} disabled={loading}>Buscar</button>
-                </div> */}
-                
                 <div>
                     <label htmlFor="id">ID do quarto para editar:</label>
                     <input
@@ -329,8 +271,10 @@ export default function Rooms(){
                     handlePrescriptionDelete()
                 }} className="deleteBtn">Deletar quarto</p>
             </form>
+            {/* fim do formulário de quartos */}
 
             <h3>Inserir quarto</h3>
+            {/* chama o formulário de criação de quartos */}
             <CreateRoomForm />
         </section>
     )

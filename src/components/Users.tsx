@@ -20,9 +20,12 @@ interface ResponseState {
 }
 
 export default function Users() {
+
+    //criação e inicialização da variável que armazenará os dados da api
     const [users, setUsers] = useState<User[]>([]);
 
     const loadUsers = () => {
+        //busca os dados existentes
         fetch('http://localhost:3002/api/users/', {
             method: 'GET',
             headers: { 'Content-Type': 'application/json' },
@@ -37,9 +40,11 @@ export default function Users() {
     };
 
     useEffect(() => {
+        //busca os dados sempre que o componente for carregado (o array vazio garante isso)
         loadUsers();
     }, []);
 
+    //criação e inicialização das variáveis do formulario
     const [formData, setFormData] = useState<UserFormData>({
         id: 0,
         username: '',
@@ -52,9 +57,13 @@ export default function Users() {
     });
 
     const [response, setResponse] = useState<ResponseState>({ message: '', type: null });
+
     const [loading, setLoading] = useState(false);
+
+    //variável que armazena o id do item a ser editado
     const [idToChange, setIdToChange] = useState('');
 
+    //quando houver alteração em algum campo do formulário, o valor inserido é armazenado na variável formData
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
         
@@ -64,6 +73,7 @@ export default function Users() {
         }));
     };
 
+    //quando o usuário clica na linha da tabela, os campos do formulário são preenchidos com os dados daquele registro
     const handleRowClick = (user: User) => {
         setFormData({
             id: user.id,
@@ -81,10 +91,12 @@ export default function Users() {
         window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
     };
 
+    //quando o formulário é enviado
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setResponse({ message: '', type: null });
     
+        //se tiver dados faltando
         if (!formData.id || !formData.username || !formData.email || !formData.name || !formData.dob || !formData.role) {
             return setResponse({ message: 'Por favor, preencha os campos obrigatórios.', type: 'error' });
         }
@@ -97,6 +109,7 @@ export default function Users() {
             genre: formData.genre === '' ? null : formData.genre
         };
     
+        //executa a edição via http put
         try {
             const res = await fetch("http://localhost:3002/api/users/" + formData.id, {
                 method: 'PUT',
@@ -107,6 +120,7 @@ export default function Users() {
     
             const data = await res.json();
     
+            //se a resposta da api for ok, limpa o formulário
             if (res.ok) {
                 setResponse({ 
                     message: 'Usuário atualizado com sucesso!', 
@@ -136,6 +150,7 @@ export default function Users() {
         }
     };
 
+    //esta função permite buscar um usuário pelo id, para casos onde há muitos usuários cadastrados
     const handleSearch = async () => {
         if (!idToChange) return;
         setLoading(true);
@@ -157,6 +172,7 @@ export default function Users() {
         }
     };
 
+    //exclusão de registro
     const handleUserDelete = async () => {
 
         const idToDelete = idToChange.trim();
@@ -168,6 +184,7 @@ export default function Users() {
         setLoading(true);
         setResponse({ message: '', type: null });
     
+        //executa a exclusão via http delete
         try {
             const response = await fetch("http://localhost:3002/api/users/" + idToDelete, {
                 method: 'DELETE',
@@ -203,6 +220,8 @@ export default function Users() {
         }
     };
 
+
+    // ============ HTML ============
     return (
         <section>
             <h2>Usuários</h2>
@@ -252,6 +271,7 @@ export default function Users() {
                 <button type="button" onClick={handleSearch} disabled={loading}>Buscar</button>
             </div>
 
+            {/* formulário de usuários */}
             <form onSubmit={handleSubmit}>
 
                 <div>
@@ -310,8 +330,10 @@ export default function Users() {
                     handleUserDelete()
                 }} className="deleteBtn">Deletar usuário</p>
             </form>
+            {/* fim do formulário de usuários */}
 
             <h3>Inserir usuário</h3>
+            {/* fim o formulário de criação usuários */}
             <CreateUserForm />
         </section>
     );

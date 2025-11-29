@@ -1,6 +1,8 @@
+import { useState } from "react"
+
+//importa os formulários de login e registro
 import LoginForm from "../components/LoginForm"
 import RegisterForm from "../components/RegisterForm"
-import { useState } from "react"
 
 export default function Login() {
 
@@ -9,7 +11,13 @@ export default function Login() {
     return (
         <section>
             {hasAccount ? <LoginForm /> : <RegisterForm />}
-            <p className="changeFormBtn" onClick={() => setHasAccount(!hasAccount)} >{hasAccount ? "Não possui conta? Crie uma!" : "Já possui conta? Entrar!"}</p>
+            <p
+                className="changeFormBtn"
+                //alterna entre os formulários
+                onClick={() => setHasAccount(!hasAccount)}
+            >
+                {hasAccount ? "Não possui conta? Crie uma!" : "Já possui conta? Entrar!"}
+            </p>
         </section>
     )
 }

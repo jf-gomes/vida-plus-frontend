@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router';
 
+//tipagem dos dados do formulário (mantendo o padrão do db)
 interface UserLoginData {
   email: string,
   password: string;
@@ -16,13 +17,17 @@ const API_URL = 'http://localhost:3002/api/users/login';
 const LoginForm: React.FC = () => {
   let navigate = useNavigate()
 
+  //criação e inicialização das variáveis do formulario
   const [formData, setFormData] = useState<UserLoginData>({
     email: '',
     password: ''
   });
+
   const [response, setResponse] = useState<ResponseState>({ message: '', type: null });
+
   const [loading, setLoading] = useState(false);
 
+  //quando houver alteração em algum campo do formulário, o valor inserido é armazenado na variável formData
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setFormData({
       ...formData,
@@ -30,16 +35,19 @@ const LoginForm: React.FC = () => {
     });
   };
 
+  //quando o formulário é enviado
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setResponse({ message: '', type: null });
 
+    //se tiver dados faltando
     if (!formData.email || !formData.password) {
         return setResponse({ message: 'Por favor, preencha todos os campos.', type: 'error' });
     }
 
     setLoading(true);
 
+    //executa o login via http post
     try {
       const response = await fetch(API_URL, {
         method: 'POST',
@@ -52,9 +60,10 @@ const LoginForm: React.FC = () => {
 
       const data = await response.json();
 
+      //se a resposta da api for ok, limpa o formulário e navega para a tela /home
       if (response.ok) {
         setResponse({ 
-          message: 'Login realizado com sucesso', 
+          message: 'Login realizado com sucesso!', 
           type: 'success' 
         });
         setFormData({ email: '', password: '' });
@@ -76,8 +85,11 @@ const LoginForm: React.FC = () => {
     }
   };
 
+
+  // ============ HTML ============
   return (
     <div>
+        {/* formulário de login */}
         <form onSubmit={handleSubmit}>
             <h1>Login Vida Plus</h1>
             <div>
@@ -110,6 +122,7 @@ const LoginForm: React.FC = () => {
 
           <button type="submit" disabled={loading}>{loading ? 'Entrando...' : 'Entrar'}</button>
         </form>
+        {/* fim do formulário de login */}
     </div>
   );
 };

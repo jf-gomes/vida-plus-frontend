@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 
+//tipagem dos dados do formulário (mantendo o padrão do db)
 interface SupplyCreationData {
   code: number,
   name: string;
@@ -15,6 +16,8 @@ interface ResponseState {
 const API_URL = 'http://localhost:3002/api/supplies/create';
 
 const CreateSupplyForm: React.FC = () => {
+
+  //cria e inicia a variávl que armazenará os dados do formulário
   const [formData, setFormData] = useState<SupplyCreationData>({
     code: 0,
     name: '',
@@ -24,6 +27,7 @@ const CreateSupplyForm: React.FC = () => {
   const [response, setResponse] = useState<ResponseState>({ message: '', type: null });
   const [loading, setLoading] = useState(false);
 
+  //quando houver mudança em algum campo do formulário, o valor inserido é armazenado na variável formData
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setFormData({
       ...formData,
@@ -31,6 +35,7 @@ const CreateSupplyForm: React.FC = () => {
     });
   };
 
+  //executa a inserção dos dados via http post
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setResponse({ message: '', type: null });

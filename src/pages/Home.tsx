@@ -23,6 +23,7 @@ export default function Home(){
     return (
 
         <>
+            {/* menu de navegação */}
             <nav>
                 <ul>
                     <li onClick={() => setSelectedMenu('users')}>Usuários</li>
