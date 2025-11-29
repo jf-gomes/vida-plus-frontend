@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import CreateUserForm from "./CreateUserForm";
 
 interface User {
     id: number,
@@ -156,12 +157,58 @@ export default function Users() {
         }
     };
 
+    const handleUserDelete = async () => {
+
+        const idToDelete = idToChange.trim();
+    
+        if (!idToDelete) {
+            return setResponse({ message: 'Por favor, informe um ID válido.', type: 'error' });
+        }
+    
+        setLoading(true);
+        setResponse({ message: '', type: null });
+    
+        try {
+            const response = await fetch("http://localhost:3002/api/users/" + idToDelete, {
+                method: 'DELETE',
+                headers: {
+                'Content-Type': 'application/json',
+                },
+                credentials: 'include',
+          });
+
+        console.log(response)
+    
+        if (response.ok) {
+
+            setResponse({ 
+                message: 'Item deletado com sucesso.', 
+                type: 'success'
+            });
+            
+        } else {
+            setResponse({ 
+                message: 'Ocorreu um erro ao deletar o item.', 
+                type: 'error' 
+            });
+        }
+        } catch (error) {
+            console.error('Erro na comunicação com a API:', error);
+            setResponse({ 
+                message: 'Erro de rede. Verifique se o backend está rodando.', 
+                type: 'error' 
+            });
+        } finally {
+            setLoading(false);
+        }
+    };
+
     return (
         <section>
             <h2>Usuários</h2>
             <table>
                 <thead>
-                    <tr>
+                    <tr className="tableHeader">
                         <th>ID</th>
                         <th>Username</th>
                         <th>Email</th>
@@ -193,21 +240,23 @@ export default function Users() {
 
             <h3>Editar usuário</h3>
             
-            <div>
-                <label>Buscar ID: </label>
-                <input 
-                    type="number" 
-                    value={idToChange} 
-                    onChange={(e) => setIdToChange(e.target.value)} 
-                />
+            <div className="searchIdDiv">
+                <div>
+                    <label>Buscar ID:</label>
+                    <input 
+                        type="number" 
+                        value={idToChange} 
+                        onChange={(e) => setIdToChange(e.target.value)} 
+                    />
+                </div>
                 <button type="button" onClick={handleSearch} disabled={loading}>Buscar</button>
             </div>
 
             <form onSubmit={handleSubmit}>
 
                 <div>
-                    <label>ID:</label>
-                    <input type="number" name="id" value={formData.id} readOnly />
+                    <label>ID do usuário para editar:</label>
+                    <input type="number" name="id" value={formData.id} readOnly disabled />
                 </div>
                 
                 <div>
@@ -248,7 +297,7 @@ export default function Users() {
                 </div>
 
                 {response.message && (
-                    <div>
+                    <div className="responseDiv">
                         {response.message}
                     </div>
                 )}
@@ -256,7 +305,14 @@ export default function Users() {
                 <button type="submit" disabled={loading || formData.id === 0}>
                     {loading ? 'Atualizando...' : 'Atualizar usuário'}
                 </button>
+
+                <p onClick={() => {
+                    handleUserDelete()
+                }} className="deleteBtn">Deletar usuário</p>
             </form>
+
+            <h3>Inserir usuário</h3>
+            <CreateUserForm />
         </section>
     );
 }

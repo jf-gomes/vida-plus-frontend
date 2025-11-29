@@ -1,27 +1,68 @@
-.loginSection {
+:root {
+  --preto: #1F363D;
+  --azul: #40798C;
+  --verde1: #70A9A1;
+  --verde2: #9EC1A3;
+}
+
+* {
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+#root {
     display: flex;
-    flex-direction: column;
-    gap: 12px;
-    justify-content: center;
     align-items: center;
-}
-
-.loginAndRegisterForms {
-    display: flex;
+    justify-content: center;
     flex-direction: column;
-    gap: 24px;
 }
 
-.loginAndRegisterForms form {
+section {
+    background-color: rgb(249, 249, 249);
+    padding: 24px;
+    border-radius: 6px;
+    width: fit-content;
+}
+
+form {
     display: flex;
     flex-direction: column;
     gap: 12px;
 }
 
-.loginAndRegisterForms form div {
+form button {
+    background-color: var(--azul);
+    color: white;
+    padding: 12px;
+    border: none;
+    border-radius: 6px;
+}
+
+input {
+    width: 200px;
+}
+
+form button:hover {
+    cursor: pointer;
+    background-color: var(--verde1);
+}
+
+form div, .searchIdDiv {
     display: flex;
     gap: 12px;
     justify-content: space-between;
+    padding: 12px;
+    border-radius: 6px;
+    border: 1px solid var(--verde2);
+}
+
+.searchIdDiv {
+    margin-bottom: 24px;
+}
+
+.searchIdDiv div {
+    display: flex;
+    gap: 12px;
+    align-items: center;
 }
 
 .changeFormBtn:hover {
@@ -29,17 +70,53 @@
     text-decoration: underline;
 }
 
-.navbar ul {
+nav ul {
     display: flex;
     gap: 12px;
     list-style-type: none;
 }
 
-.navbar ul li:hover {
+nav ul li:hover {
     cursor: pointer;
     text-decoration: underline;
 }
 
-table tr:hover {
-    background-color: grey;
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th, td {
+    padding: 12px;
+    border: 1px solid var(--verde2);
+    text-align: left;
+}
+
+tr:hover {
+    background-color: var(--verde2);
+    cursor: pointer;
+    color: white;
+}
+
+.deleteBtn {
+    color: rgb(255, 88, 88);
+}
+
+.deleteBtn:hover {
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+.tableHeader {
+    background-color: black;
+    color: white;
+}
+
+.tableHeader:hover {
+    background-color: black;
+    cursor: default;
+}
+
+.responseDiv {
+    border: none;
 }

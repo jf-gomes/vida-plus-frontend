@@ -115,63 +115,63 @@ export default function Rooms(){
 
     const [idToChange, setIdToChange] = useState('')
 
-    const handleIdChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-        setIdToChange(e.target.value)
-    };
+    // const handleIdChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    //     setIdToChange(e.target.value)
+    // };
 
-    const handleSearch = async (e: React.MouseEvent<HTMLButtonElement>) => {
-        e.preventDefault();
+    // const handleSearch = async (e: React.MouseEvent<HTMLButtonElement>) => {
+    //     e.preventDefault();
 
-        const idToSearch = idToChange.trim();
+    //     const idToSearch = idToChange.trim();
     
-        if (!idToSearch) {
-            return setResponse({ message: 'Por favor, informe um ID válido.', type: 'error' });
-        }
+    //     if (!idToSearch) {
+    //         return setResponse({ message: 'Por favor, informe um ID válido.', type: 'error' });
+    //     }
     
-        setLoading(true);
-        setResponse({ message: '', type: null });
+    //     setLoading(true);
+    //     setResponse({ message: '', type: null });
     
-        try {
-            const response = await fetch("http://localhost:3002/api/rooms/" + idToSearch, {
-                method: 'GET',
-                headers: {
-                'Content-Type': 'application/json',
-                },
-                credentials: 'include',
-          });
+    //     try {
+    //         const response = await fetch("http://localhost:3002/api/rooms/" + idToSearch, {
+    //             method: 'GET',
+    //             headers: {
+    //             'Content-Type': 'application/json',
+    //             },
+    //             credentials: 'include',
+    //       });
     
-        const data: RoomFormData = await response.json();
+    //     const data: RoomFormData = await response.json();
     
-        if (response.ok) {
+    //     if (response.ok) {
             
-            setFormData({
-                id: data.id,
-                number: data.number,
-                type: data.type,
-                capacity: data.capacity,
-            });
+    //         setFormData({
+    //             id: data.id,
+    //             number: data.number,
+    //             type: data.type,
+    //             capacity: data.capacity,
+    //         });
 
-            setResponse({ 
-                message: `Item ID ${data.id} buscado com sucesso. Preencha o resto do formulário para editar.`, 
-                type: 'success'
-            });
+    //         setResponse({ 
+    //             message: `Item ID ${data.id} buscado com sucesso. Preencha o resto do formulário para editar.`, 
+    //             type: 'success'
+    //         });
             
-        } else {
-            setResponse({ 
-                message: `Ocorreu um erro ao buscar o ID ${idToSearch}.`, 
-                type: 'error' 
-            });
-        }
-        } catch (error) {
-            console.error('Erro na comunicação com a API:', error);
-            setResponse({ 
-                message: 'Erro de rede. Verifique se o backend está rodando.', 
-                type: 'error' 
-            });
-        } finally {
-            setLoading(false);
-        }
-    };
+    //     } else {
+    //         setResponse({ 
+    //             message: `Ocorreu um erro ao buscar o ID ${idToSearch}.`, 
+    //             type: 'error' 
+    //         });
+    //     }
+    //     } catch (error) {
+    //         console.error('Erro na comunicação com a API:', error);
+    //         setResponse({ 
+    //             message: 'Erro de rede. Verifique se o backend está rodando.', 
+    //             type: 'error' 
+    //         });
+    //     } finally {
+    //         setLoading(false);
+    //     }
+    // };
 
     const handlePrescriptionDelete = async () => {
 
@@ -234,7 +234,7 @@ export default function Rooms(){
         <section>
             <h2>Quartos</h2>
             <table>
-                <tr>
+                <tr className="tableHeader">
                     <th>ID</th>
                     <th>Número</th>
                     <th>Tipo</th>
@@ -254,7 +254,7 @@ export default function Rooms(){
 
             <h3>Editar quarto</h3>
             <form onSubmit={handleSubmit}>
-                <div>
+                {/* <div>
                     <label htmlFor="idToSearch">Informe o ID para editar:</label>
                     <input 
                         type="number"
@@ -266,7 +266,7 @@ export default function Rooms(){
                         required
                     />
                     <button type="button" onClick={handleSearch} disabled={loading}>Buscar</button>
-                </div>
+                </div> */}
                 
                 <div>
                     <label htmlFor="id">ID do quarto para editar:</label>
@@ -276,6 +276,7 @@ export default function Rooms(){
                         name="id"
                         value={formData.id}
                         readOnly
+                        disabled
                     />
                 </div>
                 
@@ -316,7 +317,7 @@ export default function Rooms(){
                 </div>
                 
                 {response.message && (
-                <div>
+                <div className="responseDiv">
                     {response.message}
                 </div>
                 )}
@@ -324,9 +325,9 @@ export default function Rooms(){
                 <button type="submit" disabled={loading || formData.id === 0}>
                   {loading ? 'Atualizando...' : 'Atualizar quarto'}
                 </button>
-                <button onClick={() => {
+                <p onClick={() => {
                     handlePrescriptionDelete()
-                }}>Deletar quarto</button>
+                }} className="deleteBtn">Deletar quarto</p>
             </form>
 
             <h3>Inserir quarto</h3>

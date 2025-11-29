@@ -78,8 +78,8 @@ const LoginForm: React.FC = () => {
 
   return (
     <div>
-        <h1>Login Vida Plus</h1>
         <form onSubmit={handleSubmit}>
+            <h1>Login Vida Plus</h1>
             <div>
                 <label htmlFor="email">E-mail</label>
                 <input

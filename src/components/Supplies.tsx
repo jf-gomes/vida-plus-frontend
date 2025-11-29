@@ -118,64 +118,64 @@ export default function Supplies(){
 
     const [idToChange, setIdToChange] = useState('')
 
-    const handleIdChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-        setIdToChange(e.target.value)
-    };
+    // const handleIdChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    //     setIdToChange(e.target.value)
+    // };
 
-    const handleSearch = async (e: React.MouseEvent<HTMLButtonElement>) => {
-        e.preventDefault();
+    // const handleSearch = async (e: React.MouseEvent<HTMLButtonElement>) => {
+    //     e.preventDefault();
 
-        const idToSearch = idToChange.trim();
+    //     const idToSearch = idToChange.trim();
     
-        if (!idToSearch) {
-            return setResponse({ message: 'Por favor, informe um ID válido.', type: 'error' });
-        }
+    //     if (!idToSearch) {
+    //         return setResponse({ message: 'Por favor, informe um ID válido.', type: 'error' });
+    //     }
     
-        setLoading(true);
-        setResponse({ message: '', type: null });
+    //     setLoading(true);
+    //     setResponse({ message: '', type: null });
     
-        try {
-            const response = await fetch("http://localhost:3002/api/supplies/" + idToSearch, {
-                method: 'GET',
-                headers: {
-                'Content-Type': 'application/json',
-                },
-                credentials: 'include',
-          });
+    //     try {
+    //         const response = await fetch("http://localhost:3002/api/supplies/" + idToSearch, {
+    //             method: 'GET',
+    //             headers: {
+    //             'Content-Type': 'application/json',
+    //             },
+    //             credentials: 'include',
+    //       });
     
-        const data: SupplyFormData = await response.json();
+    //     const data: SupplyFormData = await response.json();
     
-        if (response.ok) {
+    //     if (response.ok) {
             
-            setFormData({
-                id: data.id,
-                code: data.code,
-                name: data.name,
-                description: data.description,
-                quantity: data.quantity,
-            });
+    //         setFormData({
+    //             id: data.id,
+    //             code: data.code,
+    //             name: data.name,
+    //             description: data.description,
+    //             quantity: data.quantity,
+    //         });
 
-            setResponse({ 
-                message: `Item ID ${data.id} buscado com sucesso. Preencha o resto do formulário para editar.`, 
-                type: 'success'
-            });
+    //         setResponse({ 
+    //             message: `Item ID ${data.id} buscado com sucesso. Preencha o resto do formulário para editar.`, 
+    //             type: 'success'
+    //         });
             
-        } else {
-            setResponse({ 
-                message: `Ocorreu um erro ao buscar o ID ${idToSearch}.`, 
-                type: 'error' 
-            });
-        }
-        } catch (error) {
-            console.error('Erro na comunicação com a API:', error);
-            setResponse({ 
-                message: 'Erro de rede. Verifique se o backend está rodando.', 
-                type: 'error' 
-            });
-        } finally {
-            setLoading(false);
-        }
-    };
+    //     } else {
+    //         setResponse({ 
+    //             message: `Ocorreu um erro ao buscar o ID ${idToSearch}.`, 
+    //             type: 'error' 
+    //         });
+    //     }
+    //     } catch (error) {
+    //         console.error('Erro na comunicação com a API:', error);
+    //         setResponse({ 
+    //             message: 'Erro de rede. Verifique se o backend está rodando.', 
+    //             type: 'error' 
+    //         });
+    //     } finally {
+    //         setLoading(false);
+    //     }
+    // };
 
     const handleRowClick = (supply: Supply) => {
         setFormData({
@@ -191,11 +191,55 @@ export default function Supplies(){
         window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
     }
 
+    const handleSupplyDelete = async () => {
+
+        const idToDelete = idToChange.trim();
+    
+        if (!idToDelete) {
+            return setResponse({ message: 'Por favor, informe um ID válido.', type: 'error' });
+        }
+    
+        setLoading(true);
+        setResponse({ message: '', type: null });
+    
+        try {
+            const response = await fetch("http://localhost:3002/api/supplies/" + idToDelete, {
+                method: 'DELETE',
+                headers: {
+                'Content-Type': 'application/json',
+                },
+                credentials: 'include',
+          });
+    
+        if (response.ok) {
+
+            setResponse({ 
+                message: 'Item deletado com sucesso.', 
+                type: 'success'
+            });
+            
+        } else {
+            setResponse({ 
+                message: 'Ocorreu um erro ao deletar o item.', 
+                type: 'error' 
+            });
+        }
+        } catch (error) {
+            console.error('Erro na comunicação com a API:', error);
+            setResponse({ 
+                message: 'Erro de rede. Verifique se o backend está rodando.', 
+                type: 'error' 
+            });
+        } finally {
+            setLoading(false);
+        }
+    };
+
     return (
         <section>
             <h2>Suprimentos</h2>
             <table>
-                <tr>
+                <tr className="tableHeader">
                     <th>ID</th>
                     <th>Código</th>
                     <th>Nome</th>
@@ -215,7 +259,7 @@ export default function Supplies(){
 
             <h3>Editar suprimento</h3>
             <form onSubmit={handleSubmit}>
-                <div>
+                {/* <div>
                     <label htmlFor="idToSearch">Informe o ID para buscar:</label>
                     <input 
                         type="number"
@@ -227,16 +271,17 @@ export default function Supplies(){
                         required
                     />
                     <button type="button" onClick={handleSearch} disabled={loading}>Buscar</button>
-                </div>
+                </div> */}
                 
                 <div>
-                    <label htmlFor="id">ID do Item Editando:</label>
+                    <label htmlFor="id">ID do suprimento para editar:</label>
                     <input
                         type="number"
                         id="id"
                         name="id"
                         value={formData.id}
                         readOnly
+                        disabled
                     />
                 </div>
                 
@@ -289,7 +334,7 @@ export default function Supplies(){
                 </div>
                 
                 {response.message && (
-                <div>
+                <div className="responseDiv">
                     {response.message}
                 </div>
                 )}
@@ -297,6 +342,10 @@ export default function Supplies(){
                 <button type="submit" disabled={loading || formData.id === 0}>
                   {loading ? 'Atualizando...' : 'Atualizar suprimento'}
                 </button>
+
+                <p onClick={() => {
+                    handleSupplyDelete()
+                }} className="deleteBtn">Deletar suprimento</p>
             </form>
             <h3>Inserir suprimento</h3>
             <CreateSupplyForm />

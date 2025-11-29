@@ -56,7 +56,7 @@ const CreateRoomForm: React.FC = () => {
           message: 'Cadastro de quarto realizado com sucesso', 
           type: 'success' 
         });
-        setFormData({ number: 0, type: '', capacity: 0 });
+        setFormData({ number: 0, type: 'AppointmentRoom', capacity: 0 });
       } else {
         setResponse({ 
           message: data.message || 'Falha no cadastro. Verifique os dados.', 
