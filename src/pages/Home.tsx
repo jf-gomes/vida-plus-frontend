@@ -1,8 +1,9 @@
+import { useState } from "react"
 import Supplies from "../components/Supplies"
 import Rooms from "../components/Rooms"
 import Prescriptions from "../components/Prescriptions"
-import { useState } from "react"
 import Users from "../components/Users"
+import Appointments from "../components/Appointments"
 
 export default function Home(){
 
@@ -15,6 +16,8 @@ export default function Home(){
             return <Prescriptions />
         } else if (menu == 'rooms') {
             return <Rooms />
+        }  else if (menu == 'appointments') {
+            return <Appointments />
         } else {
             return <Users />
         }
@@ -30,6 +33,7 @@ export default function Home(){
                     <li onClick={() => setSelectedMenu('supplies')}>Estoque</li>
                     <li onClick={() => setSelectedMenu('prescriptions')}>Receitas</li>
                     <li onClick={() => setSelectedMenu('rooms')}>Quartos</li>
+                    <li onClick={() => setSelectedMenu('appointments')}>Consultas</li>
                 </ul>
             </nav>
             {componentToRender(selectedMenu)}
